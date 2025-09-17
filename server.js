@@ -9,7 +9,15 @@ const TELEGRAM_BOT_TOKEN = '8399020540:AAE-GBRbJtCU-XYeBrSdiziCpZKvT__cQew';
 const CHAT_ID = '7851258138';
 
 app.use(express.json());
-app.use(express.static('public')); // untuk menyajikan file HTML dan JS
+
+// Routes untuk menyajikan file HTML dan JS
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+});
+
+app.get('/script.js', (req, res) => {
+    res.sendFile(__dirname + '/script.js');
+});
 
 // Endpoint untuk menerima data dari halaman web
 app.post('/kirim-data', async (req, res) => {
