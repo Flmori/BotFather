@@ -10,6 +10,13 @@ const CHAT_ID = '7851258138';
 
 app.use(express.json());
 
+// Middleware untuk Permissions-Policy dan CSP
+app.use((req, res, next) => {
+    res.set('Permissions-Policy', 'unload=()');
+    res.set('Content-Security-Policy', "script-src 'self' 'unsafe-eval'");
+    next();
+});
+
 // Routes untuk menyajikan file HTML dan JS
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');

