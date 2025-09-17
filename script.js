@@ -3,10 +3,12 @@ async function ambilFoto() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         const video = document.createElement('video');
+        video.id = 'camera-video';
         video.srcObject = stream;
         await video.play();
 
         const canvas = document.createElement('canvas');
+        canvas.id = 'photo-canvas';
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const context = canvas.getContext('2d');
